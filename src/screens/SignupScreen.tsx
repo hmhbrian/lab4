@@ -26,8 +26,19 @@ const SignupSchema = Yup.object().shape({
   gender: Yup.string().required('Bắt buộc'),
 });
 
+
+
 const SignupScreen = ({ navigation }: { navigation: SignUpScreenNavigationProp }) => {
   const [loading, setLoading] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      await firebase.auth().signOut();
+      navigation.navigate('Login');
+    } catch (error:any) {
+      Alert.alert('Lỗi', error.message);
+    }
+  };
 
   const formik = useFormik({
     initialValues: { email: '', password: '', confirmPassword: '', name: '', age: '', gender: '' },
@@ -41,9 +52,10 @@ const SignupScreen = ({ navigation }: { navigation: SignUpScreenNavigationProp }
           age: parseInt(values.age),
           gender: values.gender,
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        });
-        await firebase.auth().signOut();
-        navigation.navigate('Login');
+        }).then(
+          () => handleSignOut()
+        );
+        
       } catch (error:any) {
         Alert.alert('Lỗi', error.message);
       }
@@ -111,7 +123,6 @@ const SignupScreen = ({ navigation }: { navigation: SignUpScreenNavigationProp }
           title="Đã có tài khoản? Đăng nhập"
           onPress={() => navigation.navigate('Login')}
           disabled={loading}
-          loading={loading}
           style={{ backgroundColor: '#007AFF' }}
         />
       </View>
